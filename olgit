@@ -1,0 +1,134 @@
+#!/bin/bash
+##################################################
+# MIT License
+##################################################
+# File: olgit
+# Description: Synchronize Overleaf and Git using
+#	       overleaf-sync by Moritz Glöckl.
+# Author: Pavel Hajek
+# License: MIT
+# Version: 1.0
+##################################################
+
+VERSION="1.0"
+
+MODIFIER=$1
+
+if [ "$MODIFIER" == "merge" ]; then
+
+	OLDIR="$2/.olgit"
+	
+	if [ ! -d $OLDIR ]; then
+		echo "The olgit directory does not exist."	
+		echo "Run \"olgit pull PROJECT DIRECTORY\" first. " 
+		exit 1
+	fi
+
+	cd "$2"
+	
+	git pull "$OLDIR" master --allow-unrelated-histories || exit 1
+
+	exit 0
+fi
+
+PROJ_NAME=$2
+
+OLAUTH_FILE="$3/.olauth" 
+
+OLDIR="$3/.olgit"
+
+if [ "$MODIFIER" == "pull" ]; then
+
+	cd $3
+
+	if [ ! -f $OLAUTH_FILE ]; then
+		echo "The authentification cookie not found."
+		echo "Trying to create it in \"$OLAUTH_FILE\"..."
+		ols login || exit 1
+	fi	
+
+	if [ ! -d $OLDIR ]; then
+		echo "The olgit directory not found."	
+		echo "Creating the olgit directory "$OLDIR"..." 
+		mkdir $OLDIR || exit 1
+	fi
+
+	cd "$OLDIR"
+
+	# Check if .oldir is the root of a git repository
+	if [ ! $(git rev-parse --show-toplevel 2>/dev/null) -ef $PWD ]; then
+		echo "The olgit directory is not a git repository."
+		echo "Running git to initialize one..."
+		git init || exit 1
+	else
+		echo "The olgit repository \"$OLDIR\" will be used. "
+		echo "Warning: uncommited changes will be lost!"
+	fi
+		
+	echo "Downloading \"$PROJ_NAME\"..."
+	# Download the Overleaf project into the Overleaf directory
+	# The opttions mean: 	-r 		only download from remote to local;
+	#		 	-n "str"	name of the project on overleaf;
+	#			-path "str"	path to the .olauth cookie;
+	ols -r -n "$PROJ_NAME" --store-path "../.olauth" || exit 1
+
+	echo "Commiting..."
+	git add * || exit 1
+	git commit -m "Project \"$PROJ_NAME\", $(date '+%d/%m/%Y %H:%M:%S')" || exit 1
+	
+	exit 0
+
+fi
+
+if [ "$MODIFIER" == "push" ]; then
+	
+	cd $3
+	
+	# Get the list of tracked files from git
+	TRACKED_FILES=(`git ls-files`)
+	ALL_FILES=(`find . ! -path . -type f -printf "%P\n"`)
+
+	# Construct the list of ignored files for ols
+		
+	IGNORED_FILES=()
+
+	for f in "${ALL_FILES[@]}"; do
+
+		TMPBOOL=true 
+	
+		for g in "${TRACKED_FILES[@]}"; do
+		
+			if [ "$f" == "$g" ]; then
+				
+				TMPBOOL=false 
+
+				break
+
+			fi
+
+		done
+
+		if [ "$TMPBOOL" = true ]; then
+
+			IGNORED_FILES+=("$f")
+		fi
+
+	done 
+
+	printf "%s\n" "${IGNORED_FILES[@]}" > .olignore
+		
+	echo "Uploading the content of \"$3\" to \"$PROJ_NAME\""  
+
+	ols -l -n "$PROJ_NAME" --store-path ".olauth" -i ".olignore" || exit 1
+
+	exit 0
+
+fi
+
+echo "This is olgit version $VERSION"
+echo "Run the following commands:"
+echo "		1. olgit pull PROJ DIR"
+echo "		2. olgit merge DIR"
+echo "		3. olgit push PROJ DIR"
+
+exit 0
