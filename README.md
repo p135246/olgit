@@ -11,7 +11,7 @@ It creates a new git repository `DIR/.olgit` where a local copy of `PROJ` is kep
 The workflow is to first pull `PROJ` from Overleaf to `DIR/.olgit` by running `olgit pull PROJ DIR`, then merge it to `DIR` using `olgit merge DIR`, and finally push `DIR` to `PROJ` on Overleaf by running `olgit push PROJ DIR`.
 The merge is implemented as `git pull OLDIR/.olgit DIR --allow-unrelated-histories`.
 The script also creates an authentification cookie `DIR/.olauth` and a list of ignored files `DIR/.olignore` needed by `ols` (overleaf-sync).
-The cookie has to be renewed time to time.
+The cookie has to be renewed time to time (delete it and run olgit pull).
 
 ## List of commands and their technical description
 
