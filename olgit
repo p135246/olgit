@@ -37,6 +37,10 @@ OLAUTH_FILE="$3/.olauth"
 
 OLDIR="$3/.olgit"
 
+if [ "$MODIFIER" == "login" ]; then
+	ols login || exit 1
+fi
+
 if [ "$MODIFIER" == "pull" ]; then
 
 	cd $3
@@ -70,7 +74,10 @@ if [ "$MODIFIER" == "pull" ]; then
 	# The opttions mean: 	-r 		only download from remote to local;
 	#		 	-n "str"	name of the project on overleaf;
 	#			-path "str"	path to the .olauth cookie;
-	ols -r -n "$PROJ_NAME" --store-path "../.olauth" || exit 1
+	if [ ! $(ols -r -n "$PROJ_NAME" --store-path "../.olauth") ]; then
+		echo "Try running \"olgit login\" to renew the authentification cookie."
+		exit 1
+	fi
 
 	echo "Commiting..."
 	git add * || exit 1
@@ -130,5 +137,6 @@ echo "Run the following commands:"
 echo "		1. olgit pull PROJ DIR"
 echo "		2. olgit merge DIR"
 echo "		3. olgit push PROJ DIR"
+echo "		4. olgit login"
 
 exit 0

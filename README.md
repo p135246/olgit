@@ -11,7 +11,7 @@ It creates a new git repository `DIR/.olgit` where a local copy of `PROJ` is kep
 The workflow is to first pull `PROJ` from Overleaf to `DIR/.olgit` by running `olgit pull PROJ DIR`, then merge it to `DIR` using `olgit merge DIR`, and finally push `DIR` to `PROJ` on Overleaf by running `olgit push PROJ DIR`.
 The merge is implemented as `git pull OLDIR/.olgit DIR --allow-unrelated-histories`.
 The script also creates an authentification cookie `DIR/.olauth` and a list of ignored files `DIR/.olignore` needed by `ols` (overleaf-sync).
-The cookie has to be renewed time to time (delete it and run olgit pull).
+The cookie has to be renewed time to time.
 
 ## List of commands and their technical description
 
@@ -34,7 +34,17 @@ The cookie has to be renewed time to time (delete it and run olgit pull).
 
           Calls `ols` to upload tracked files in `DIR` to `PROJ` on Overleaf.
           By design of `ols`, a file `DIR/.olignore` with the list of all ignnored files, i.e., the untracked files, has to be created.
-          
+
+* `olgit login`:
+	
+	Runs `ols login` to renew the authentification cookie.          
+
+## Troubleshooting
+
+* The download fails:
+	
+	Try renewing the authentification cookie by running `ols login`.
+
 ## TODO
 
 1. Rewrite olgit in Python without using `olsync.py` at all.
