@@ -37,13 +37,13 @@ The cookie has to be renewed time to time.
 
 * `olgit login`:
 	
-	Runs `ols login` to renew the authentification cookie.          
+	  Runs `ols login` to renew the authentification cookie.          
 
 ## Troubleshooting
 
 * The download fails:
 	
-	Try renewing the authentification cookie by running `ols login`.
+	  Try renewing the authentification cookie by running `ols login`.
 
 ## TODO
 
