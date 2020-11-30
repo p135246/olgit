@@ -66,15 +66,18 @@ if [ "$MODIFIER" == "pull" ]; then
 		git init || exit 1
 	else
 		echo "The olgit repository \"$OLDIR\" will be used. "
-		echo "Warning: uncommited changes will be lost!"
 	fi
 		
 	echo "Downloading \"$PROJ_NAME\"..."
+	
 	# Download the Overleaf project into the Overleaf directory
 	# The opttions mean: 	-r 		only download from remote to local;
 	#		 	-n "str"	name of the project on overleaf;
 	#			-path "str"	path to the .olauth cookie;
-	if [ ! $(ols -r -n "$PROJ_NAME" --store-path "../.olauth") ]; then
+	
+	ols -r -n "$PROJ_NAME" --store-path "../.olauth"
+	
+	if [ ! $? -eq 0 ]; then		
 		echo "Try running \"olgit login\" to renew the authentification cookie."
 		exit 1
 	fi
